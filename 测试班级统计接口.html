@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试班级统计接口</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #409eff;
+            padding-bottom: 10px;
+        }
+        .input-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background: #409eff;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #66b1ff;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border-left: 4px solid #409eff;
+        }
+        .error {
+            border-left-color: #f56c6c;
+            background: #fef0f0;
+            color: #f56c6c;
+        }
+        .success {
+            border-left-color: #67c23a;
+            background: #f0f9ff;
+        }
+        pre {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-panel">
+        <h1>🧪 测试班级统计接口</h1>
+        
+        <div class="input-group">
+            <label>选择班级：</label>
+            <select id="className">
+                <option value="高一1班">高一1班</option>
+                <option value="高一2班">高一2班</option>
+                <option value="高一3班">高一3班</option>
+                <option value="高二1班">高二1班</option>
+                <option value="高二2班">高二2班</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>后端地址：</label>
+            <input type="text" id="apiUrl" value="http://localhost:8080" />
+        </div>
+
+        <button onclick="testAPI()">🚀 测试接口</button>
+        <button onclick="testWithoutAuth()" style="background: #e6a23c;">⚠️ 测试（无认证）</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const className = document.getElementById('className').value;
+            const apiUrl = document.getElementById('apiUrl').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<div class="result">⏳ 正在测试接口...</div>';
+            
+            try {
+                // 获取token（从localStorage）
+                const token = localStorage.getItem('token');
+                
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                
+                const response = await fetch(`${apiUrl}/api/stats/class/${encodeURIComponent(className)}`, {
+                    method: 'GET',
+                    headers: headers
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    displaySuccess(data.data);
+                } else {
+                    displayError(`错误: ${data.message || '未知错误'}`);
+                }
+            } catch (error) {
+                displayError(`请求失败: ${error.message}`);
+            }
+        }
+
+        async function testWithoutAuth() {
+            const className = document.getElementById('className').value;
+            const apiUrl = document.getElementById('apiUrl').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<div class="result">⏳ 正在测试接口（无认证）...</div>';
+            
+            try {
+                const response = await fetch(`${apiUrl}/api/stats/class/${encodeURIComponent(className)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const text = await response.text();
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        <h3>响应状态: ${response.status} ${response.statusText}</h3>
+                        <pre>${text}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                displayError(`请求失败: ${error.message}`);
+            }
+        }
+
+        function displaySuccess(data) {
+            const resultDiv = document.getElementById('result');
+            
+            let html = '<div class="result success">';
+            html += '<h2>✅ 接口测试成功！</h2>';
+            
+            html += '<div class="stats-grid">';
+            html += `
+                <div class="stat-card">
+                    <div class="stat-label">学生总数</div>
+                    <div class="stat-value">${data.studentCount || 0}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">错题总数</div>
+                    <div class="stat-value">${data.totalErrorCount || 0}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">人均错题</div>
+                    <div class="stat-value">${(data.averageErrorPerStudent || 0).toFixed(1)}</div>
+                </div>
+            `;
+            html += '</div>';
+            
+            html += '<h3>📊 学科分布：</h3>';
+            html += '<pre>' + JSON.stringify(data.subjectStats || {}, null, 2) + '</pre>';
+            
+            html += '<h3>📈 难度分布：</h3>';
+            html += '<pre>' + JSON.stringify(data.difficultyStats || {}, null, 2) + '</pre>';
+            
+            html += '<h3>🔥 高频错题 TOP 10：</h3>';
+            html += '<pre>' + JSON.stringify(data.topErrors || {}, null, 2) + '</pre>';
+            
+            html += '<h3>📝 完整响应数据：</h3>';
+            html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            
+            html += '</div>';
+            
+            resultDiv.innerHTML = html;
+        }
+
+        function displayError(message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <div class="result error">
+                    <h2>❌ 测试失败</h2>
+                    <p>${message}</p>
+                    <h3>可能的原因：</h3>
+                    <ul>
+                        <li>后端服务未启动</li>
+                        <li>后端地址不正确</li>
+                        <li>需要登录认证（请先在系统中登录）</li>
+                        <li>接口权限不足（需要教师或管理员权限）</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        // 页面加载时显示说明
+        window.onload = function() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <div class="result">
+                    <h3>📋 使用说明：</h3>
+                    <ol>
+                        <li>确保后端服务已启动（端口8080）</li>
+                        <li>选择要查询的班级</li>
+                        <li>点击"测试接口"按钮</li>
+                        <li>查看返回的统计数据</li>
+                    </ol>
+                    <p><strong>注意：</strong>此接口需要教师或管理员权限。如果提示401错误，请先在系统中登录。</p>
+                </div>
+            `;
+        };
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

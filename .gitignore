@@ -1,0 +1,68 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+target/
+*.class
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Logs
+*.log
+logs/
+backend-log.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Uploads and temporary files
+uploads/
+*.tmp
+*.temp
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Compiled files
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test files (optional - you may want to keep some)
+query
+
+# Redis
+dump.rdb
+
+# Backup files
+*.bak
+*.backup
+*~

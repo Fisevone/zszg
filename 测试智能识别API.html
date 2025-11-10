@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试智能识别API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .result-box.show {
+            display: block;
+        }
+        
+        .result-box.success {
+            border-color: #52c41a;
+            background: #f6ffed;
+        }
+        
+        .result-box.error {
+            border-color: #f5222d;
+            background: #fff1f0;
+        }
+        
+        .result-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        
+        .result-content {
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            color: #666;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .status.success {
+            background: #52c41a;
+            color: white;
+        }
+        
+        .status.error {
+            background: #f5222d;
+            color: white;
+        }
+        
+        .status.loading {
+            background: #1890ff;
+            color: white;
+        }
+        
+        .info-box {
+            background: #e6f7ff;
+            border: 2px solid #91d5ff;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .warning-box {
+            background: #fffbe6;
+            border: 2px solid #ffe58f;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 智能识别API测试工具</h1>
+        <p class="subtitle">快速测试错题智能识别功能是否正常</p>
+        
+        <div class="info-box">
+            <strong>📝 使用说明：</strong><br>
+            1. 先在系统中登录，获取Token<br>
+            2. 将Token粘贴到下方输入框<br>
+            3. 输入测试题目内容<br>
+            4. 点击"测试识别"按钮<br>
+            5. 查看识别结果
+        </div>
+        
+        <div class="warning-box">
+            <strong>⚠️ 注意事项：</strong><br>
+            • 确保后端服务已启动（端口8080）<br>
+            • Token可以在浏览器控制台执行 <code>localStorage.getItem('token')</code> 获取<br>
+            • 如果提示401错误，说明Token无效，需要重新登录获取
+        </div>
+        
+        <div class="section">
+            <div class="section-title">🔑 第一步：输入Token</div>
+            <div class="label">JWT Token（从浏览器localStorage中获取）</div>
+            <input type="text" id="token" placeholder="粘贴你的JWT Token...">
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📝 第二步：输入题目内容</div>
+            <div class="label">题目内容</div>
+            <textarea id="content" placeholder="例如：解方程：2x + 5 = 15"></textarea>
+        </div>
+        
+        <button onclick="testAPI()" id="testBtn">✨ 开始测试识别</button>
+        
+        <div class="result-box" id="resultBox">
+            <div class="result-title" id="resultTitle">识别结果</div>
+            <div class="result-content" id="resultContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        async function testAPI() {
+            const token = document.getElementById('token').value.trim();
+            const content = document.getElementById('content').value.trim();
+            const resultBox = document.getElementById('resultBox');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultContent = document.getElementById('resultContent');
+            const testBtn = document.getElementById('testBtn');
+            
+            // 验证输入
+            if (!token) {
+                alert('请输入JWT Token！');
+                return;
+            }
+            
+            if (!content) {
+                alert('请输入题目内容！');
+                return;
+            }
+            
+            // 显示加载状态
+            testBtn.disabled = true;
+            testBtn.innerHTML = '⏳ 识别中...';
+            resultBox.className = 'result-box show';
+            resultBox.classList.remove('success', 'error');
+            resultTitle.innerHTML = '🤖 AI正在识别中... <span class="status loading">处理中</span>';
+            resultContent.textContent = '请稍候...（预计3-10秒）';
+            
+            try {
+                const startTime = Date.now();
+                
+                // 调用API
+                const response = await fetch('http://localhost:8080/api/errorbook/parse-question', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ content })
+                });
+                
+                const endTime = Date.now();
+                const duration = ((endTime - startTime) / 1000).toFixed(2);
+                
+                const data = await response.json();
+                
+                if (response.ok && data.code === 200) {
+                    // 成功
+                    resultBox.classList.add('success');
+                    resultTitle.innerHTML = '✅ 识别成功 <span class="status success">成功</span>';
+                    
+                    const result = data.data;
+                    let output = `耗时: ${duration}秒\n\n`;
+                    output += `【识别结果】\n`;
+                    output += `学科: ${result.subject || '未识别'}\n`;
+                    output += `难度: ${result.difficulty || '未识别'}\n`;
+                    output += `题型: ${result.questionType || '未识别'}\n`;
+                    output += `置信度: ${result.confidence || '未知'}\n\n`;
+                    
+                    if (result.answer) {
+                        output += `【答案】\n${result.answer}\n\n`;
+                    }
+                    
+                    if (result.analysis) {
+                        output += `【解析】\n${result.analysis}\n\n`;
+                    }
+                    
+                    if (result.knowledgePoints && result.knowledgePoints.length > 0) {
+                        output += `【知识点】\n${result.knowledgePoints.join(', ')}\n\n`;
+                    }
+                    
+                    if (result.errorPoints && result.errorPoints.length > 0) {
+                        output += `【易错点】\n${result.errorPoints.join(', ')}\n\n`;
+                    }
+                    
+                    if (result.tags && result.tags.length > 0) {
+                        output += `【标签】\n${result.tags.join(', ')}\n\n`;
+                    }
+                    
+                    if (result.tips) {
+                        output += `【提示】\n${result.tips}\n\n`;
+                    }
+                    
+                    if (result.reasoning) {
+                        output += `【推理过程】\n${result.reasoning}`;
+                    }
+                    
+                    resultContent.textContent = output;
+                    
+                } else {
+                    // 失败
+                    resultBox.classList.add('error');
+                    resultTitle.innerHTML = '❌ 识别失败 <span class="status error">失败</span>';
+                    resultContent.textContent = `错误信息: ${data.message || '未知错误'}\n状态码: ${response.status}\n响应: ${JSON.stringify(data, null, 2)}`;
+                }
+                
+            } catch (error) {
+                // 异常
+                resultBox.classList.add('error');
+                resultTitle.innerHTML = '❌ 请求失败 <span class="status error">异常</span>';
+                resultContent.textContent = `错误: ${error.message}\n\n可能原因:\n1. 后端服务未启动（检查8080端口）\n2. 网络连接问题\n3. Token无效或过期\n4. CORS跨域问题`;
+                
+            } finally {
+                testBtn.disabled = false;
+                testBtn.innerHTML = '✨ 开始测试识别';
+            }
+        }
+        
+        // 支持回车提交
+        document.getElementById('content').addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                testAPI();
+            }
+        });
+        
+        // 页面加载时尝试自动获取Token
+        window.addEventListener('load', () => {
+            // 提示用户如何获取Token
+            console.log('💡 提示：你可以在登录后的页面控制台执行以下命令获取Token：');
+            console.log('localStorage.getItem("token")');
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

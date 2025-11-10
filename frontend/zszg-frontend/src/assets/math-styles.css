@@ -1,0 +1,53 @@
+/* 数学公式样式 - 不依赖任何外部库 */
+
+/* 分数样式 */
+.fraction {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0.1em;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+.fraction sup {
+  display: block;
+  font-size: 0.8em;
+  line-height: 1;
+  margin-bottom: -0.2em;
+}
+
+.fraction sub {
+  display: block;
+  font-size: 0.8em;
+  line-height: 1;
+  margin-top: -0.2em;
+}
+
+/* 使分数斜线更明显 */
+.fraction sup::after {
+  content: '';
+}
+
+/* 确保分数在不同背景下都清晰可见 */
+.math-content .fraction,
+.block-content .fraction,
+.question-text .fraction,
+.question-content .fraction {
+  color: inherit;
+  font-weight: 500;
+}
+
+/* 上标样式优化 */
+sup {
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+/* 下标样式优化 */
+sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+  line-height: 0;
+}
+
